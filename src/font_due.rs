@@ -30,25 +30,22 @@ pub fn render() {
     // The text that will be laid out, its size, and the index of the font in the font list to use for
     // that section of text.
 
-    layout.append(fonts, &TextStyle::new("Hello ".repeat(1).borrow(), 35.0, 0));
+    layout.append(fonts, &TextStyle::new("A".repeat(1).borrow(), 35.0, 0));
     // layout.append(fonts, &TextStyle::new("world!", 40.0, 0));
     // Prints the layout for "Hello world!"
-    let mut _image = DynamicImage::new_rgb8(1000, 100).to_rgb8();
+    let mut image = DynamicImage::new_rgb8(100, 100).to_rgb8();
     for glyph in layout.glyphs() {
         let (metrics, bitmap) = fonts[0].rasterize_config(glyph.key);
         // Output
         dbg!(metrics);
+        let mut row: u32 = 0;
         for (i, b) in bitmap.iter().enumerate() {
             if i > 0 && i % metrics.width == 0 {
-                print!("\n");
+                row += 1;
             }
-            let p = (*b as f64) / 255.0;
-            if p >= 0.5 {
-                print!("0");
-            }else {
-                print!(" ")
-            }
+            let p = *b;
+            image.put_pixel((i % metrics.width) as u32, row, Rgb([p, p, p]))
         }
     }
-    _image.save("image_example.jpg").unwrap();
+    image.save("image_example.jpg").unwrap();
 }
