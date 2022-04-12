@@ -1,11 +1,14 @@
+use std::borrow::Borrow;
+use std::fs;
 use image::{DynamicImage, Rgb};
 use rusttype::{Font, point, Scale};
 
 pub fn render(){
     // Load the font
-    let font_data = include_bytes!("../SourceHanSansSC-Light.ttf");
+    // let font_data = include_bytes!("../SourceHanSansSC-Light.ttf");
+    let font_data = fs::read("./SourceHanSansSC-Light.ttf").unwrap();
     // This only succeeds if collection consists of one font
-    let font = Font::try_from_bytes(font_data as &[u8]).expect("Error constructing Font");
+    let font = Font::try_from_bytes(font_data.borrow()).expect("Error constructing Font");
 
     // The font size to use
     let scale = Scale::uniform(64.0);
