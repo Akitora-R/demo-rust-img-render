@@ -1,6 +1,7 @@
 mod rust_type;
-mod font_due;
+mod font_due_render;
+mod image_merge;
 
 fn main() {
-    font_due::lined_render();
+
 }
