@@ -1,9 +1,11 @@
-use std::borrow::Borrow;
-use std::time::SystemTime;
+use fontdue::layout::{
+    CoordinateSystem, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign, WrapStyle,
+};
 use fontdue::Font;
-use fontdue::layout::{CoordinateSystem, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign, WrapStyle};
 use image::{DynamicImage, Rgb};
 use once_cell::sync::Lazy;
+use std::borrow::Borrow;
+use std::time::SystemTime;
 
 pub static FONT: Lazy<Font> = Lazy::new(|| {
     let font_byte = std::fs::read("./SourceHanSansCN-Light.otf").unwrap();
@@ -25,7 +27,7 @@ pub fn render() {
         let p = *b;
         let vx = (i % metrics.width) as i32 + base_x_offset;
         let real_x = if vx <= 0 { 0 } else { vx as u32 };
-        let real_y = base_y_offset as u32 - metrics.advance_height as u32;
+        let real_y = base_y_offset as u32 - metrics.height as u32;
         image.put_pixel(real_x, real_y, Rgb([p, p, p]));
     }
     image.save("image_example.jpg").unwrap();
@@ -55,7 +57,7 @@ pub fn lined_render() {
         max_width: Some(W),
         max_height: None,
         horizontal_align: HorizontalAlign::Left,
-        vertical_align: VerticalAlign::Top,
+        vertical_align: VerticalAlign::Bottom,
         wrap_style: WrapStyle::Word,
         wrap_hard_breaks: true,
     });
@@ -66,11 +68,12 @@ pub fn lined_render() {
     layout.append(fonts, &TextStyle::new(text.repeat(10).borrow(), 35.0, 0));
     let mut image = DynamicImage::new_rgb8(W as u32, layout.height() as u32).to_rgb8();
     for lp in layout.lines().unwrap() {
+        dbg!(lp);
         let baseline: i32 = -lp.baseline_y as i32;
         let mut base_x_offset: i32 = 0;
         for glyph in &layout.glyphs()[lp.glyph_start..=lp.glyph_end] {
             let (metrics, bitmap) = fonts[0].rasterize_config(glyph.key);
-            let mut base_y_offset: i32 = baseline + metrics.ymin;
+            let mut base_y_offset: i32 = baseline;
             base_x_offset += metrics.xmin;
             for (i, b) in bitmap.iter().enumerate() {
                 if i > 0 && i % metrics.width == 0 {
@@ -79,12 +82,12 @@ pub fn lined_render() {
                 let p = *b;
                 let vx = (i % metrics.width) as i32 + base_x_offset;
                 let real_x = if vx <= 0 { 0 } else { vx as u32 };
-                let real_y = base_y_offset as u32 - metrics.advance_height as u32;
+                let real_y = base_y_offset as u32 - metrics.height as u32;
                 image.put_pixel(real_x, real_y, Rgb([p, p, p]));
             }
             base_x_offset += metrics.width as i32;
         }
     }
     image.save("image_example.jpg").unwrap();
-    println!("{:#?}",SystemTime::now().duration_since(start).unwrap());
+    println!("{:#?}", SystemTime::now().duration_since(start).unwrap());
 }

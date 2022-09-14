@@ -1,7 +1,6 @@
-use std::num::NonZeroU32;
 use std::time::SystemTime;
 use image::{DynamicImage, GenericImageView, ImageFormat, Pixel, Rgb};
-use image::imageops::Nearest;
+use image::codecs::jpeg::JpegEncoder;
 
 pub fn render_img() {
     let mut image = DynamicImage::new_rgb8(1000, 2000).to_rgb8();
@@ -12,7 +11,7 @@ pub fn render_img() {
     let d = 900.0 / (x as f64);
     let nx = 900 as u32;
     let ny = (d * y as f64) as u32;
-    let ib = image::imageops::resize(&i, nx, ny, image::imageops::Nearest);
+    let ib = image::imageops::resize(&i, nx, ny, image::imageops::Lanczos3);
     let mut row = 0;
     for px in image.pixels_mut() {
         *px = Rgb([255, 255, 255]);
@@ -24,6 +23,6 @@ pub fn render_img() {
         }
         image.put_pixel(x, row, p.to_rgb());
     }
-    image.save("image_example.jpg").unwrap();
-    println!("耗时 {:#?}", SystemTime::now().duration_since(start).unwrap());
+    image.save("image_example.png").unwrap();
+    println!("耗时 {:#?}", start.elapsed().unwrap());
 }
